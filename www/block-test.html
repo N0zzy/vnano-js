@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>VirtualBlock Test</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 0; }
+    .block { border-bottom: 2px solid #333; background: #f4f6f9; }
+    .heavy-content { padding: 20px; box-sizing: border-box; }
+    .heavy-content h2 { margin-top: 0; color: #007bff; }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.components.js"></script>
+
+<script>
+  if (typeof $v !== 'undefined') {
+    const { Component, h, VirtualBlock, createApp } = $v;
+
+    class TestApp extends Component {
+      // Функция генерации тяжелого контента
+      renderBlockContent = (num) => {
+        return h('div', { class: 'heavy-content' },
+                h('h2', null, `Block ${num} (Visible)`),
+                h('p', null, 'Этот контент рендерится только когда блок на экране. Если уйти, он удалится.'),
+                h('div', { style: 'display: flex; gap: 10px;' },
+                        Array.from({length: 5}, (_, i) => h('div', { style: 'width: 50px; height: 50px; background: red;' }, i))
+                )
+        );
+      };
+
+      render() {
+        // Генерируем 10 блоков по 600px высотой
+        const blocks = Array.from({ length: 10 }, (_, i) => {
+          return h(VirtualBlock, {
+            height: 600,
+            renderContent: () => this.renderBlockContent(i)
+          });
+        });
+
+        return h('div', null, blocks);
+      }
+    }
+
+    createApp('#app').mount(TestApp);
+  }
+</script>
+</body>
+</html>

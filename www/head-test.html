@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Initial Title</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: white;
+        }
+
+        .row {
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .info {
+            color: #555;
+            font-size: 14px;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.components.js"></script>
+
+<script>
+    const {createApp, head} = $v;
+
+    // Получаем менеджер head
+    const meta = head();
+
+    class RootView extends Component {
+        render() {
+            // Читаем значения в render, чтобы подписаться на изменения (хотя тут мы их меняем)
+            const title = meta.title;
+            const desc = meta.description;
+
+            return h('div', {class: 'card'},
+                h('h1', null, 'Управление Head'),
+                h('div', {class: 'row'},
+                    h('label', null, 'Title:'),
+                    h('input', {
+                        value: title,
+                        oninput: (e) => meta.title = e.target.value
+                    })
+                ),
+                h('div', {class: 'row'},
+                    h('label', null, 'Description:'),
+                    h('input', {
+                        value: desc,
+                        oninput: (e) => meta.description = e.target.value
+                    })
+                ),
+                h('div', {class: 'info'},
+                    h('p', null, 'Посмотри на вкладку браузера — заголовок страницы меняется в реальном времени!'),
+                    h('p', null, 'Открой DevTools (F12) -> Elements -> <head>, чтобы увидеть как меняются мета-теги.')
+                )
+            );
+        }
+    }
+
+    createApp('#app').mount(RootView);
+</script>
+</body>
+</html>

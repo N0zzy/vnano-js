@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Web Components Visual Test</title>
+    <style>
+        body { font-family: sans-serif; padding: 40px; }
+        h1 { color: #333; }
+        /* Стили для Shadow DOM нужно задавать внутри -->
+    </style>
+</head>
+<body>
+<h1>Тест Web Components</h1>
+
+<!-- Использование как обычный HTML тег! -->
+<my-counter></my-counter>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.components.js"></script>
+
+<script>
+    const { define } = $v;
+
+    class Counter extends Component {
+        constructor() {
+            super();
+            this.count = signal(0);
+        }
+
+        render() {
+            return h('div', { style: 'padding: 20px; border: 2px solid blue; border-radius: 8px; display: inline-block;' },
+                h('p', null, `Счетчик: ${this.count.value}`),
+                h('button', {
+                    style: 'padding: 5px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;',
+                    onclick: () => this.count.value++
+                }, '+1')
+            );
+        }
+    }
+
+    // Регистрируем как Custom Element
+    define('my-counter', Counter, { shadow: true });
+</script>
+</body>
+</html>

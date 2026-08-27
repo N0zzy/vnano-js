@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Storage Plugin Visual Test</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark-theme { background: #1e1e1e; color: #e0e0e0; }
+    body.light-theme { background: #f9f9f9; color: #333; }
+
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(5px);
+    }
+    .row { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #888;
+      border-radius: 4px;
+      background: transparent;
+      color: inherit;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: #007bff;
+      color: white;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    button:hover { background: #0056b3; }
+    .danger { background: #dc3545; }
+    .danger:hover { background: #c82333; }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.components.js"></script>
+
+<script>
+  // 1. Создаем сигналы, которые автоматически сохраняются в localStorage
+  const themeSignal = $v.createLocalSignal('app-theme', 'light');
+  const nameSignal = $v.createLocalSignal('user-name', '');
+  const bioSignal = $v.createLocalSignal('user-bio', '');
+
+  class RootView extends $v.Component {
+    render() {
+      // Читаем значения прямо в render, чтобы подписаться на изменения
+      const theme = themeSignal.value;
+      const name = nameSignal.value;
+      const bio = bioSignal.value;
+
+      // Меняем класс body в зависимости от темы
+      document.body.className = theme + '-theme';
+
+      return $v.h('div', null,
+              $v.h('h1', null, 'Настройки профиля (Persistent)'),
+              $v.h('p', null, 'Измени данные, перезагрузи страницу — всё сохранится!'),
+
+              $v.h('div', { class: 'card' },
+                      $v.h('div', { class: 'row' },
+                              $v.h('label', null, 'Имя:'),
+                              $v.h('input', {
+                                placeholder: 'Введите имя',
+                                value: name, // Контролируемый инпут
+                                oninput: (e) => nameSignal.value = e.target.value
+                              })
+                      ),
+                      $v.h('div', { class: 'row' },
+                              $v.h('label', null, 'Биография:'),
+                              $v.h('textarea', {
+                                placeholder: 'Расскажите о себе',
+                                rows: 3,
+                                oninput: (e) => bioSignal.value = e.target.value
+                              }, bio) // Внутренний текст textarea
+                      ),
+                      $v.h('button', {
+                        onclick: () => themeSignal.value = theme === 'light' ? 'dark' : 'light'
+                      }, `Сменить тему (сейчас: ${theme})`)
+              ),
+
+              $v.h('div', { class: 'card' },
+                      $v.h('h3', null, 'Текущие сохраненные данные:'),
+                      $v.h('p', null, $v.h('b', null, 'Имя: '), name || '(пусто)'),
+                      $v.h('p', null, $v.h('b', null, 'Био: '), bio || '(пусто)'),
+                      $v.h('p', null, $v.h('b', null, 'Тема: '), theme),
+
+                      $v.h('hr', null),
+                      $v.h('button', {
+                        class: 'danger',
+                        onclick: () => {
+                          $v.clearLocal('user-name');
+                          $v.clearLocal('user-bio');
+                          nameSignal.value = '';
+                          bioSignal.value = '';
+                        }
+                      }, 'Очистить данные формы')
+              )
+      );
+    }
+  }
+
+  $v.createApp('#app').mount(RootView);
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>I18n Plugin Visual Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 50px;
+            max-width: 600px;
+            margin: auto;
+            background: #f0f2f5;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            margin: 0 5px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .btn.active {
+            background: #0056b3;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.components.js"></script>
+
+<script>
+    const { createApp, createI18n } = $v;
+
+    // 1. Создаем i18n инстанс
+    const i18n = createI18n({
+        defaultLocale: 'en',
+        fallbackLocale: 'en',
+        messages: {
+            en: {
+                title: 'Internationalization Test',
+                greeting: 'Hello, {name}!',
+                switch: 'Switch Language'
+            },
+            ru: {
+                title: 'Тест Интернационализации',
+                greeting: 'Привет, {name}!',
+                switch: 'Сменить язык'
+            }
+        }
+    });
+
+    class RootView extends Component {
+        switchLang(lang) {
+            i18n.setLocale(lang);
+        }
+
+        render() {
+            const currentLang = i18n.locale.value;
+
+            return h('div', {class: 'card'},
+                // h1 и p будут автоматически обновляться при смене языка
+                h('h1', null, i18n.t('title')),
+                h('p', null, i18n.t('greeting', {name: 'Developer'})),
+
+                h('div', {style: 'margin-top: 20px;'},
+                    h('button', {
+                        class: `btn ${currentLang === 'en' ? 'active' : ''}`,
+                        onclick: () => this.switchLang('en')
+                    }, 'EN'),
+                    h('button', {
+                        class: `btn ${currentLang === 'ru' ? 'active' : ''}`,
+                        onclick: () => this.switchLang('ru')
+                    }, 'RU')
+                )
+            );
+        }
+    }
+
+    createApp('#app').mount(RootView);
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TransitionGroup Visual Test</title>
+  <style>
+    body {
+      font-family: sans-serif; background: #f0f2f5; padding: 40px; display: flex; justify-content: center;
+    }
+    .app-container { width: 100%; max-width: 400px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 20px; }
+    .header { display: flex; gap: 10px; margin-bottom: 20px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .btn-add { background: #28a745; color: white; }
+    .btn-rem { background: #dc3545; color: white; }
+
+    .list-group { display: flex; flex-direction: column; gap: 10px; }
+    .list-item {
+      padding: 15px; background: #007bff; color: white; border-radius: 8px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-sizing: border-box;
+    }
+    .del-btn { background: rgba(0,0,0,0.2); border: none; color: white; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; }
+
+    /* --- АНИМАЦИИ --- */
+    .v-enter { opacity: 0; transform: scale(0.9); }
+    .v-enter-active { transition: opacity 0.3s, transform 0.3s; opacity: 1; transform: scale(1); }
+
+    .v-leave { opacity: 1; transform: scale(1); }
+    .v-leave-active { transition: opacity 0.3s, transform 0.3s; opacity: 0; transform: scale(0.9); }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <div id="app"></div>
+</div>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.components.js"></script>
+
+<script>
+  if (typeof $v !== 'undefined') {
+    const { Component, h, signal, createApp, TransitionGroup } = $v;
+
+    class TodoApp extends Component {
+      constructor() {
+        super();
+        this.items = signal([
+          { id: 1, text: 'Изучить vnano.js' },
+          { id: 2, text: 'Написать тесты' },
+          { id: 3, text: 'Запустить в прод' }
+        ]);
+        this.nextId = 4;
+      }
+
+      addItem = () => {
+        const newItem = { id: this.nextId++, text: `Задача ${this.nextId}` };
+        this.items.value = [...this.items.value, newItem];
+
+      };
+
+      removeItem = (id) => {
+        let f = this.items.value.filter(item => item.id !== id);
+        this.items.value = f;
+      };
+
+      render() {
+        return h('div', null,
+                h('div', { class: 'header' },
+                        h('button', { class: 'btn btn-add', onclick: this.addItem }, '+ Добавить'),
+                ),
+                h(TransitionGroup, { name: 'v', tag: 'div', className: 'list-group' },
+                        this.items.value.map(item =>
+                                h('div', { key: item.id, className: 'list-item' },
+                                        h('span', null, item.text),
+                                        h('button', {
+                                          class: 'del-btn',
+                                          onclick: () => this.removeItem(item.id)
+                                        }, 'X')
+                                )
+                        )
+                )
+        );
+      }
+    }
+
+    const app = createApp('#app');
+    app.mount(TodoApp);
+  }
+</script>
+</body>
+</html>

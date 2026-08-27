@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReactiveStore Visual Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+            background: #f0f2f5;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex: 1;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .info {
+            color: #555;
+            font-size: 14px;
+        }
+
+        .highlight {
+            color: #007bff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<h1>ReactiveStore Visual Test</h1>
+<p class="info">Попробуй изменить имя, возраст или город. Изменения сразу применяются в UI через Proxy.</p>
+<div id="app"></div>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.components.js"></script>
+
+<script>
+    // 1. Создаем стор
+    const userStore = $v.createStore(
+        {
+            name: 'Иван',
+            age: 25,
+            address: {city: 'Москва', street: 'Тверская'}
+        },
+        {
+            setName(state, name) {
+                state.name = name;
+            },
+            incrementAge(state) {
+                state.age++;
+            },
+            changeCity(state, city) {
+                state.address.city = city;
+            }
+        }
+    );
+
+    // 2. ИСПРАВЛЕНО: Компонент назван RootView, а не App
+    class RootView extends $v.Component {
+        render() {
+            const name = userStore.state.name;
+            const age = userStore.state.age;
+            const city = userStore.state.address.city;
+
+            return $v.h('div', {class: 'card'},
+                $v.h('h2', null, `Профиль: `, $v.h('span', {class: 'highlight'}, name)),
+                $v.h('p', null, `Возраст: `, $v.h('span', {class: 'highlight'}, age)),
+                $v.h('p', null, `Город: `, $v.h('span', {class: 'highlight'}, city)),
+                $v.h('hr', null),
+                $v.h('div', {class: 'row'},
+                    $v.h('input', {
+                        placeholder: 'Новое имя',
+                        oninput: (e) => userStore.dispatch('setName', e.target.value)
+                    }),
+                    $v.h('button', {onclick: () => userStore.dispatch('incrementAge')}, '+1 год')
+                ),
+                $v.h('div', {class: 'row'},
+                    $v.h('input', {
+                        placeholder: 'Новый город',
+                        oninput: (e) => userStore.dispatch('changeCity', e.target.value)
+                    })
+                )
+            );
+        }
+    }
+
+    // 3. Монтируем RootView
+    $v.createApp('#app').mount(RootView);
+</script>
+</body>
+</html>

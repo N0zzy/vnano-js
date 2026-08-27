@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTM (Tagged Templates) Visual Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+            color: #333;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #007bff;
+            margin-top: 0;
+        }
+
+        h2 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .list-item {
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .highlight {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.components.js"></script>
+
+<script>
+    const {createApp} = $v;
+
+    // 1. Дочерний компонент (принимает пропсы)
+    class Greeting extends Component {
+        render() {
+            // Используем html`` для пропсов и детей
+            return html`
+                <div style="margin-top: 10px; padding: 10px; background: #e9ecef;">
+                    <h3>Hello, ${this.props.name}!</h3>
+                    <p>You are ${this.props.age} years old.</p>
+                </div>`;
+        }
+    }
+
+    // 2. Корневой компонент
+    class RootView extends Component {
+        constructor() {
+            super();
+            this.count = signal(0);
+            this.showChild = signal(true);
+            this.items = signal(['Apple', 'Banana', 'Cherry']);
+            this.newItem = signal('');
+        }
+
+        addItem = () => {
+            if (this.newItem.value) {
+                this.items.value = [...this.items.value, this.newItem.value];
+                this.newItem.value = '';
+            }
+        };
+
+        render() {
+            // Локальные переменные для удобства
+            const count = this.count.value;
+            const showChild = this.showChild.value;
+            const items = this.items.value;
+            const newItem = this.newItem.value;
+
+            // МАГИЯ HTM: Пишем чистый HTML с интерполяцией
+            return html`
+                <div class="card">
+                    <h1>HTM (Tagged Templates) Demo</h1>
+                    <p>Это синтаксис html\`\` для быстрой разработки.</p>
+                </div>
+
+                <div class="card">
+                    <h2>1. Dynamic Props & Interpolation</h2>
+                    <p>Count: <span class="highlight">${count}</span></p>
+                    <button class="btn" onclick=${() => this.count.value++}>Increment</button>
+                </div>
+
+                <div class="card">
+                    <h2>2. Components & Props</h2>
+                    <button class="btn btn-danger" onclick=${() => this.showChild.value = !showChild}>
+                        ${showChild ? 'Hide' : 'Show'} Child
+                    </button>
+
+                    <!-- Условный рендеринг -->
+                    ${showChild ? html`
+                        <${Greeting} name="Ivan" age=${30}/>` : null}
+                </div>
+
+                <div class="card">
+                    <h2>3. Lists & Forms</h2>
+                    <div style="margin-bottom: 15px;">
+                        <input
+                                type="text"
+                                placeholder="Add new item..."
+                                value=${newItem}
+                                oninput=${(e) => this.newItem.value = e.target.value}
+                                style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 200px;"
+                        />
+                        <button class="btn btn-success" onclick=${this.addItem}>Add</button>
+                    </div>
+
+                    <!-- Рендеринг списка через map -->
+                    <div>
+                        ${items.map((item, index) => html`
+                            <div class="list-item">
+                                <span>${index + 1}. ${item}</span>
+                                <button
+                                        class="btn btn-danger"
+                                        style="padding: 2px 8px;"
+                                        onclick=${() => this.items.value = items.filter((_, i) => i !== index)}
+                                >X
+                                </button>
+                            </div>
+                        `)}
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    createApp('#app').mount(RootView);
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>VirtualList: Scroll & Jump Test</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .controls { margin-bottom: 15px; }
+    .controls button { padding: 8px 16px; margin-right: 10px; cursor: pointer; }
+    .list-wrapper { border: 1px solid #ccc; height: 600px; }
+    .row { display: flex; align-items: center; padding: 0 15px; box-sizing: border-box; border-bottom: 1px solid #eee; }
+    .id-badge { background: #007bff; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-right: 15px; }
+    .name { font-weight: bold; }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.components.js"></script>
+
+<script>
+  if (typeof $v !== 'undefined') {
+    const { Component, h, VirtualList, createApp } = $v;
+
+    class TestApp extends Component {
+      constructor() {
+        super();
+        this.listInstance = null;
+      }
+      setListInstance = (inst) => { this.listInstance = inst; };
+
+      renderPlayer = (index, domEl) => {
+        domEl.className = 'row';
+        domEl.innerHTML = `
+                        <span class="id-badge">#${index}</span>
+                        <span class="name">Player_${index}</span>
+                    `;
+      };
+
+      jumpTo = (index) => {
+        this.listInstance.scrollToIndex(index);
+      };
+
+      render() {
+        return h('div', null,
+                h('div', { class: 'controls' },
+                        h('button', { onclick: () => this.jumpTo(100) }, 'Jump to #100'),
+                        h('button', { onclick: () => this.jumpTo(50000) }, 'Jump to #50000'),
+                        h('button', { onclick: () => this.jumpTo(4999990) }, 'Jump to End')
+                ),
+                h('div', { class: 'list-wrapper' },
+                        h(VirtualList, {
+                          instanceRef: this.setListInstance,
+                          length: 500000000,
+                          itemHeight: 50,
+                          height: 600,
+                          renderItem: this.renderPlayer,
+                          scrollStep: 100, // Дистанция скролла за щелчок мыши (px)
+                          smoothScroll: true // Включить плавную анимацию
+                        })
+                )
+        );
+      }
+    }
+
+    createApp('#app').mount(TestApp);
+  }
+</script>
+</body>
+</html>

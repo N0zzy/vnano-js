@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Forms Plugin Visual Test</title>
+    <style>
+        body { font-family: sans-serif; padding: 50px; max-width: 500px; margin: auto; background: #f0f2f5; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .row { margin-bottom: 15px; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .error { color: #dc3545; font-size: 12px; margin-top: 4px; height: 14px; }
+        .btn { padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%; }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.components.js"></script>
+
+<script>
+    const {  createApp } = $v;
+
+    class RootView extends Component {
+        constructor() {
+            super();
+            this.form = this.$form({
+                email: { value: '', required: true, email: true },
+                password: { value: '', required: true, minLength: 6 }
+            }).withErrors({
+                email: "Это не электронная почта",
+                password: "Неверно указано символов"
+            });
+        }
+
+        handleSubmit = () => {
+            if (this.form.isValid()) {
+                alert('Форма валидна! Данные: ' + JSON.stringify(this.form.getValues()));
+            } else {
+                alert('Форма невалидна! Проверьте ошибки.');
+            }
+        };
+
+        render() {
+            return h('div', { class: 'card' },
+                h('h2', null, 'Регистрация (Custom Errors)'),
+
+                h('div', { class: 'row' },
+                    h('input', {
+                        placeholder: 'Email',
+                        ...this.form.field('email')
+                    }),
+                    h('div', { class: 'error' }, this.form.errors.email.value || '')
+                ),
+
+                h('div', { class: 'row' },
+                    h('input', {
+                        type: 'password',
+                        placeholder: 'Пароль (мин. 6 символов)',
+                        ...this.form.field('password')
+                    }),
+                    h('div', { class: 'error' }, this.form.errors.password.value || '')
+                ),
+
+                h('button', { class: 'btn', onclick: this.handleSubmit }, 'Отправить')
+            );
+        }
+    }
+
+    createApp('#app').mount(RootView);
+</script>
+</body>
+</html>

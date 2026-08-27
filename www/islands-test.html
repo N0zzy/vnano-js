@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Islands Architecture Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .static {
+            color: gray;
+        }
+
+        .island {
+            border: 2px solid green;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.components.js"></script>
+
+<script>
+    const {createApp, Island} = $v;
+
+    class RootView extends Component {
+        constructor() {
+            super();
+            this.count = signal(0);
+        }
+
+        render() {
+            return h('div', null,
+                // Статичная часть (в реальном SSR здесь не было бы событий)
+                h('div', {class: 'static'},
+                    h('h1', null, 'Статичный заголовок'),
+                    h('p', null, 'Эта часть не интерактивна.')
+                ),
+
+                // Интерактивный Остров
+                h(Island, null,
+                    h('div', {class: 'island'},
+                        h('h2', null, 'Интерактивный остров'),
+                        h('p', null, `Счетчик: ${this.count.value}`),
+                        h('button', {class: 'btn', onclick: () => this.count.value++}, 'Нажми меня')
+                    )
+                ),
+
+                // Еще один остров
+                h(Island, null,
+                    h('div', {class: 'island'},
+                        h('input', {placeholder: 'Я тоже интерактивен!'})
+                    )
+                )
+            );
+        }
+    }
+
+    createApp('#app').mount(RootView);
+</script>
+</body>
+</html>

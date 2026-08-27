@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motion Plugin Visual Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 50px;
+            background: #f0f2f5;
+        }
+
+        .modal-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            margin-top: 15px;
+        }
+
+        /* Анимации */
+        .v-enter {
+            opacity: 0;
+        }
+
+        .v-enter-active {
+            transition: opacity 0.3s;
+            opacity: 1;
+        }
+
+        .v-leave {
+            opacity: 1;
+        }
+
+        .v-leave-active {
+            transition: opacity 0.3s;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.components.js"></script>
+
+<script>
+    const {createApp, Motion} = $v;
+
+    class RootView extends Component {
+        constructor() {
+            super();
+            this.isOpen = signal(false);
+        }
+
+        render() {
+            return h('div', null,
+                h('button', { class: 'btn', onclick: () => this.isOpen.value = true }, 'Открыть модалку'),
+
+                // Оборачиваем модалку в Motion
+                h(Motion, { show: this.isOpen.value, name: 'v', duration: 300 },
+                    h('div', { class: 'modal-bg', onclick: () => this.isOpen.value = false },
+                        h('div', { class: 'modal', onclick: (e) => e.stopPropagation() },
+                            h('h2', null, 'Привет!'),
+                            h('p', null, 'Я модальное окно с анимацией.'),
+                            h('button', { class: 'btn btn-danger', onclick: () => this.isOpen.value = false }, 'Закрыть')
+                        )
+                    )
+                )
+            );
+        }
+    }
+
+    createApp('#app').mount(RootView);
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Resource Plugin Visual Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 50px;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .loading {
+            color: orange;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.components.js"></script>
+
+<script>
+    const {createApp,  createResource} = $v;
+
+    // Сигнал ID пользователя
+    const userId = signal(1);
+
+    // Создаем ресурс (автоматически.fetchит данные при изменении userId)
+    const userResource = createResource(userId, async (id) => {
+        // Симулируем задержку сети
+        await new Promise(r => setTimeout(r, 500));
+        return {name: `Пользователь ${id}`, email: `user${id}@test.com`};
+    });
+
+    class RootView extends Component {
+        render() {
+            // Читаем значения для подписки
+            const user = userResource.value;
+            const loading = userResource.loading.value;
+            const error = userResource.error.value;
+
+            let content;
+            if (loading) {
+                content = h('p', {class: 'loading'}, 'Загрузка...');
+            } else if (error) {
+                content = h('p', {class: 'error'}, `Ошибка: ${error.message}`);
+            } else if (user) {
+                content = h('div', null,
+                    h('h2', null, user.name),
+                    h('p', null, `Email: ${user.email}`)
+                );
+            }
+
+            return h('div', {class: 'card'},
+                h('h1', null, 'Профиль пользователя'),
+                h('div', {style: 'margin-bottom: 20px;'},
+                    h('button', {class: 'btn', onclick: () => userId.value = 1}, 'ID 1'),
+                    h('button', {class: 'btn', onclick: () => userId.value = 2}, 'ID 2'),
+                    h('button', {class: 'btn', onclick: () => userId.value = 3}, 'ID 3')
+                ),
+                content
+            );
+        }
+    }
+
+    createApp('#app').mount(RootView);
+</script>
+</body>
+</html>

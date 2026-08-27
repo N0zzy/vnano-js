@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vnano DevTools - Advanced Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background: #f0f2f5;
+            color: #333;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: width 0.3s;
+        }
+
+        .sidebar.hidden {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .main {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #3498db;
+            color: white;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-success {
+            background: #2ecc71;
+        }
+
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="../src/vnano.js"></script>
+<script src="../src/vnano.devtools.js"></script>
+
+<script>
+    const { createApp } = $v;
+
+    // 1. Компонент элемента списка (Глубина 3)
+    class TodoItem extends Component {
+        render() {
+            const {text, id, onRemove} = this.props;
+            return h('div', {class: 'todo-item'},
+                h('span', null, text),
+                h('button', {class: 'btn btn-danger', onclick: () => onRemove(id)}, 'X')
+            );
+        }
+    }
+
+    // 2. Компонент списка (Глубина 2)
+    class TodoList extends Component {
+        constructor() {
+            super();
+            this.items = signal([
+                {id: 1, text: 'Изучить vnano.js'},
+                {id: 2, text: 'Написать плагины'}
+            ]);
+            this.nextId = 3;
+        }
+
+        addItem = () => {
+            this.items.value = [...this.items.value, {id: this.nextId, text: `Задача ${this.nextId}`}];
+            this.nextId++;
+        };
+
+        removeItem = (id) => {
+            this.items.value = this.items.value.filter(item => item.id !== id);
+        };
+
+        render() {
+            return h('div', {class: 'card'},
+                h('h2', null, 'Список задач'),
+                h('button', {class: 'btn btn-success', onclick: this.addItem}, '+ Добавить'),
+                h('div', {style: 'margin-top: 15px;'},
+                    this.items.value.map(item =>
+                        h(TodoItem, {key: item.id, text: item.text, id: item.id, onRemove: this.removeItem})
+                    )
+                )
+            );
+        }
+    }
+
+    // 3. Компонент Сайдбара (Глубина 1)
+    class Sidebar extends Component {
+        constructor() {
+            super();
+            this.menuItems = ['Dashboard', 'Settings', 'Logout'];
+        }
+
+        render() {
+            return h('div', {class: 'sidebar'},
+                h('h3', null, 'Меню'),
+                this.menuItems.map(item => h('p', null, item))
+            );
+        }
+    }
+
+    // 4. Корневой компонент (Глубина 0)
+    class RootView extends Component {
+        constructor() {
+            super();
+            this.isSidebarOpen = signal(true);
+            this.appTitle = signal('Advanced DevTools Demo');
+        }
+
+        toggleSidebar = () => {
+            this.isSidebarOpen.value = !this.isSidebarOpen.value;
+        };
+
+        render() {
+            return h('div', {style: 'display: flex; height: 100%;'},
+                this.isSidebarOpen.value ? h(Sidebar, null) : null,
+
+                h('div', {class: 'main'},
+                    h('div', {class: 'card'},
+                        h('h1', null, this.appTitle.value),
+                        h('button', {class: 'btn', onclick: this.toggleSidebar},
+                            this.isSidebarOpen.value ? 'Скрыть сайдбар' : 'Показать сайдбар'
+                        )
+                    ),
+                    h(TodoList, null)
+                )
+            );
+        }
+    }
+
+    // Монтируем приложение
+    createApp('#app').mount(RootView);
+
+    // Включаем DevTools!
+    $v.devtools.init();
+</script>
+</body>
+</html>
