@@ -5,6 +5,7 @@
 !.gitignore
 !package.json
 !vitest.config.js
+!README.md
 
 # 3. Разрешаем папки и их содержимое
 !src/
@@ -17,3 +18,4 @@
 # 4. Исключения внутри hmr
 hmr/package-lock.json
 hmr/node_modules/
+
