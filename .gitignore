@@ -16,6 +16,8 @@
 !hmr/**
 !tests
 !tests/**
+!dist
+!dist/**
 
 # 4. Исключения внутри hmr
 hmr/package-lock.json
